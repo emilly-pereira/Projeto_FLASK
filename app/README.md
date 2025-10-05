@@ -105,5 +105,5 @@ Professor (1) ─── (N) Turma (1) ─── (N) Aluno
 
 1. *Clonar o repositório*
    ```bash
-   git clone https://github.com/emilly-pereira/Projeto_API.git
-   cd PROJETO_API
+   git clone https://github.com/emilly-pereira/Projeto_FLASK.git
+   cd Projeto_FLASK
