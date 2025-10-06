@@ -1,7 +1,7 @@
 from app import db
 
 class Professor(db.Model):
-    _tablename_ = 'professores'
+    __tablename__ = 'professores'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100))
     idade = db.Column(db.Integer)
