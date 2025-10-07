@@ -1,34 +1,72 @@
-from flask import Blueprint, jsonify, request
-from app.controllers.turma_controller import *
+from flask import Blueprint, request, jsonify
+from app.controllers import turma_controller as controller
+from flasgger import swag_from
 
-turma_bp = Blueprint('turma', __name__)
+turma_bp = Blueprint('turmas', __name__)
 
 @turma_bp.route('/turmas', methods=['GET'])
-def get_turmas():
-
-    turmas = listar_turmas()
-    return jsonify([t._dict_ for t in turmas])
+@swag_from({
+    'tags': ['Turmas'],
+    'summary': 'Listar todas as turmas',
+    'responses': {
+        200: {
+            'description': 'Lista de turmas',
+            'examples': {'application/json': [{'id': 1, 'nome': 'Turma A', 'ano': 2025}]}
+        }
+    }
+})
+def listar_turmas():
+    return jsonify(controller.listar_turmas())
 
 @turma_bp.route('/turmas/<int:id>', methods=['GET'])
-def get_turma(id):
-
-    t = buscar_turma(id)
-    return jsonify(t._dict_) if t else ('Turma não encontrada', 404)
+@swag_from({
+    'tags': ['Turmas'],
+    'summary': 'Buscar uma turma pelo ID',
+    'parameters': [{'name': 'id', 'in': 'path', 'required': True, 'type': 'integer'}],
+    'responses': {200: {'description': 'Turma encontrada'},404: {'description': 'Turma não encontrada'}}
+})
+def buscar_turma(id):
+    turma = controller.buscar_turma(id)
+    return jsonify(turma.__dict__ if turma else {"erro": "Turma não encontrada"})
 
 @turma_bp.route('/turmas', methods=['POST'])
-def post_turma():
-
-    t = criar_turma(request.json)
-    return jsonify(t._dict_), 201
+@swag_from({
+    'tags': ['Turmas'],
+    'summary': 'Criar uma nova turma',
+    'parameters': [{
+        'name': 'body',
+        'in': 'body',
+        'schema': {'type': 'object','properties': {'nome': {'type': 'string'},'ano': {'type': 'integer'}}}
+    }],
+    'responses': {201: {'description': 'Turma criada com sucesso'}}
+})
+def criar_turma():
+    data = request.json
+    nova = controller.criar_turma(data)
+    return jsonify(nova.__dict__), 201
 
 @turma_bp.route('/turmas/<int:id>', methods=['PUT'])
-def put_turma(id):
-
-    t = atualizar_turma(id, request.json)
-    return jsonify(t._dict_)
+@swag_from({
+    'tags': ['Turmas'],
+    'summary': 'Atualizar uma turma pelo ID',
+    'parameters': [
+        {'name': 'id', 'in': 'path', 'required': True, 'type': 'integer'},
+        {'name': 'body', 'in': 'body', 'schema': {'type': 'object','properties': {'nome': {'type': 'string'},'ano': {'type': 'integer'}}}}
+    ],
+    'responses': {200: {'description': 'Turma atualizada com sucesso'},404: {'description': 'Turma não encontrada'}}
+})
+def atualizar_turma(id):
+    data = request.json
+    turma = controller.atualizar_turma(id, data)
+    return jsonify(turma.__dict__ if turma else {"erro": "Turma não encontrada"})
 
 @turma_bp.route('/turmas/<int:id>', methods=['DELETE'])
-def delete_turma(id):
-
-    deletar_turma(id)
-    return '', 204
+@swag_from({
+    'tags': ['Turmas'],
+    'summary': 'Excluir uma turma pelo ID',
+    'parameters': [{'name': 'id', 'in': 'path', 'required': True, 'type': 'integer'}],
+    'responses': {200: {'description': 'Turma removida com sucesso'},404: {'description': 'Turma não encontrada'}}
+})
+def deletar_turma(id):
+    turma = controller.deletar_turma(id)
+    return jsonify({"mensagem": "Turma removida com sucesso"} if turma else {"erro": "Turma não encontrada"})
